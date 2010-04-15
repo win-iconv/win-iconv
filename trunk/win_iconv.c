@@ -1093,7 +1093,7 @@ libiconv_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode)
         dllname = xstrndup(p, e - p);
         if (dllname == NULL)
             return FALSE;
-        hlibiconv = LoadLibrary(dllname);
+        hlibiconv = LoadLibrary(TEXT(dllname));
         free(dllname);
         if (hlibiconv != NULL)
         {
