@@ -661,15 +661,15 @@ load_mlang()
     HMODULE h;
     if (ConvertINetString != NULL)
         return TRUE;
-    h = LoadLibrary("mlang.dll");
+    h = LoadLibrary(TEXT("mlang.dll"));
     if (!h)
         return FALSE;
-    ConvertINetString = (CONVERTINETSTRING)GetProcAddress(h, "ConvertINetString");
-    ConvertINetMultiByteToUnicode = (CONVERTINETMULTIBYTETOUNICODE)GetProcAddress(h, "ConvertINetMultiByteToUnicode");
-    ConvertINetUnicodeToMultiByte = (CONVERTINETUNICODETOMULTIBYTE)GetProcAddress(h, "ConvertINetUnicodeToMultiByte");
-    IsConvertINetStringAvailable = (ISCONVERTINETSTRINGAVAILABLE)GetProcAddress(h, "IsConvertINetStringAvailable");
-    LcidToRfc1766A = (LCIDTORFC1766A)GetProcAddress(h, "LcidToRfc1766A");
-    Rfc1766ToLcidA = (RFC1766TOLCIDA)GetProcAddress(h, "Rfc1766ToLcidA");
+    ConvertINetString = (CONVERTINETSTRING)GetProcAddress(h, TEXT("ConvertINetString"));
+    ConvertINetMultiByteToUnicode = (CONVERTINETMULTIBYTETOUNICODE)GetProcAddress(h, TEXT("ConvertINetMultiByteToUnicode"));
+    ConvertINetUnicodeToMultiByte = (CONVERTINETUNICODETOMULTIBYTE)GetProcAddress(h, TEXT("ConvertINetUnicodeToMultiByte"));
+    IsConvertINetStringAvailable = (ISCONVERTINETSTRINGAVAILABLE)GetProcAddress(h, TEXT("IsConvertINetStringAvailable"));
+    LcidToRfc1766A = (LCIDTORFC1766A)GetProcAddress(h, TEXT("LcidToRfc1766A"));
+    Rfc1766ToLcidA = (RFC1766TOLCIDA)GetProcAddress(h, TEXT("Rfc1766ToLcidA"));
     return TRUE;
 }
 
@@ -1093,7 +1093,7 @@ libiconv_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode)
         dllname = xstrndup(p, e - p);
         if (dllname == NULL)
             return FALSE;
-        hlibiconv = LoadLibrary(TEXT(dllname));
+        hlibiconv = LoadLibraryA(dllname);
         free(dllname);
         if (hlibiconv != NULL)
         {
@@ -1114,16 +1114,16 @@ libiconv_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode)
     if (hmsvcrt == NULL)
         goto failed;
 
-    _iconv_open = (f_iconv_open)GetProcAddress(hlibiconv, "libiconv_open");
+    _iconv_open = (f_iconv_open)GetProcAddress(hlibiconv, TEXT("libiconv_open"));
     if (_iconv_open == NULL)
-        _iconv_open = (f_iconv_open)GetProcAddress(hlibiconv, "iconv_open");
-    cd->iconv_close = (f_iconv_close)GetProcAddress(hlibiconv, "libiconv_close");
+        _iconv_open = (f_iconv_open)GetProcAddress(hlibiconv, TEXT("iconv_open"));
+    cd->iconv_close = (f_iconv_close)GetProcAddress(hlibiconv, TEXT("libiconv_close"));
     if (cd->iconv_close == NULL)
-        cd->iconv_close = (f_iconv_close)GetProcAddress(hlibiconv, "iconv_close");
-    cd->iconv = (f_iconv)GetProcAddress(hlibiconv, "libiconv");
+        cd->iconv_close = (f_iconv_close)GetProcAddress(hlibiconv, TEXT("iconv_close"));
+    cd->iconv = (f_iconv)GetProcAddress(hlibiconv, TEXT("libiconv"));
     if (cd->iconv == NULL)
-        cd->iconv = (f_iconv)GetProcAddress(hlibiconv, "iconv");
-    cd->_errno = (f_errno)GetProcAddress(hmsvcrt, "_errno");
+        cd->iconv = (f_iconv)GetProcAddress(hlibiconv, TEXT("iconv"));
+    cd->_errno = (f_errno)GetProcAddress(hmsvcrt, TEXT("_errno"));
     if (_iconv_open == NULL || cd->iconv_close == NULL
             || cd->iconv == NULL || cd->_errno == NULL)
         goto failed;
@@ -1195,7 +1195,7 @@ find_imported_module_by_funcname(HMODULE hModule, const char *funcname)
                 ImpName = (PIMAGE_IMPORT_BY_NAME)
                     (Base + (DWORD)Name->u1.AddressOfData);
                 if (strcmp((char *)ImpName->Name, funcname) == 0)
-                    return GetModuleHandle((char *)(Base + Imp->Name));
+                    return GetModuleHandleA((char *)(Base + Imp->Name));
             }
         }
     }
