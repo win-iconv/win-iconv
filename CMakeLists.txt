@@ -6,6 +6,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 set(CPACK_GENERATOR "TBZ2")
 include(CPack)
 option(BUILD_TEST "build test executable" OFF)
+option(BUILD_STATIC "build the static lib" OFF)
 if(BUILD_TEST)
     enable_testing()
 endif(BUILD_TEST)
@@ -38,6 +39,18 @@ endif(WINCE)
 install(TARGETS iconv win_iconv RUNTIME DESTINATION bin
                                 LIBRARY DESTINATION lib
                                 ARCHIVE DESTINATION lib)
+                                                  
+if(BUILD_STATIC)
+    add_library(iconv-static STATIC win_iconv.c)
+    set_target_properties(iconv-static PROPERTIES OUTPUT_NAME "iconv")
+    if(WINCE)
+        target_link_libraries(iconv-static ${WCECOMPAT_LIBRARIES})
+    endif(WINCE)
+    install(TARGETS iconv-static RUNTIME DESTINATION bin
+                                 LIBRARY DESTINATION lib
+                                 ARCHIVE DESTINATION lib)
+endif(BUILD_STATIC)
+
 
 install(FILES iconv.h DESTINATION include)
 
