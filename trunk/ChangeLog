@@ -2,6 +2,9 @@
 
 	* win_iconv_test.c: Removed unused variable.
 
+	* win_iconv_test.c: Added USE_ICONV_H flag to compile with -liconv.
+	(Issue 2) (Thanks to amorilia.gamebox)
+
 2010-04-14  Patrick von Reth
 
 	* added c++ support
