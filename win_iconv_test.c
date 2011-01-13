@@ -1,5 +1,14 @@
 
+#ifdef USE_ICONV_H
+#include <iconv.h>
+#include <windows.h>
+#include <errno.h>
+#include <string.h>
+#include <stdlib.h>
+#else
 #include "win_iconv.c"
+#endif
+
 #include <stdio.h>
 
 const char *
@@ -65,12 +74,14 @@ check_enc(const char *encname, int codepage)
         printf("%s(%d) IS NOT SUPPORTED: SKIP THE TEST\n", encname, codepage);
         return FALSE;
     }
+#ifndef USE_ICONV_H
     cp = ((rec_iconv_t *)cd)->from.codepage;
     if (cp != codepage)
     {
         printf("%s(%d) ALIAS IS MAPPED TO DIFFERENT CODEPAGE (%d)\n", encname, codepage, cp);
         exit(1);
     }
+#endif
     iconv_close(cd);
     return TRUE;
 }
