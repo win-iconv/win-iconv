@@ -1,3 +1,7 @@
+2011-01-13  Yukihiro Nakadaira
+
+	* win_iconv_test.c: Removed unused variable.
+
 2010-04-14  Patrick von Reth
 
 	* added c++ support

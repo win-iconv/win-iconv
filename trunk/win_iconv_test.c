@@ -75,8 +75,6 @@ check_enc(const char *encname, int codepage)
     return TRUE;
 }
 
-int use_dll;
-
 void
 test(const char *from, const char *fromstr, int fromsize, const char *to, const char *tostr, int tosize, int errcode, int bufsize, int line)
 {
@@ -87,7 +85,9 @@ test(const char *from, const char *fromstr, int fromsize, const char *to, const 
     size_t outbytesleft;
     iconv_t cd;
     size_t r;
+#ifdef USE_LIBICONV_DLL
     char dllpath[_MAX_PATH];
+#endif
 
     cd = iconv_open(to, from);
     if (cd == (iconv_t)(-1))
