@@ -1,3 +1,8 @@
+2011-05-15  Yukihiro Nakadaira
+
+	* Makefile: use variable for tools in Makefile
+	(Issue 3) (Thanks to mkbosmans)
+
 2011-01-13  Yukihiro Nakadaira
 
 	* win_iconv_test.c: Removed unused variable.

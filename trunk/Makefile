@@ -1,3 +1,9 @@
+CC ?= gcc
+AR ?= ar
+RANLIB ?= ranlib
+DLLWRAP ?= dllwrap
+DLLTOOL ?= dlltool
+STRIP ?= strip
 
 # comma separated list (e.g. "iconv.dll,libiconv.dll")
 DEFAULT_LIBICONV_DLL ?= \"\"
@@ -11,23 +17,23 @@ all: iconv.dll libiconv.a win_iconv.exe
 dist: test win_iconv.zip
 
 iconv.dll: win_iconv.c
-	gcc $(CFLAGS) -c win_iconv.c -DMAKE_DLL
-	dllwrap --dllname iconv.dll --def iconv.def win_iconv.o $(SPECS_FLAGS)
-	strip iconv.dll
+	$(CC) $(CFLAGS) -c win_iconv.c -DMAKE_DLL
+	$(DLLWRAP) --dllname iconv.dll --def iconv.def win_iconv.o $(SPECS_FLAGS)
+	$(STRIP) iconv.dll
 
 libiconv.a: win_iconv.c
-	gcc $(CFLAGS) -c win_iconv.c
-	ar rcs libiconv.a win_iconv.o
-	ranlib libiconv.a
+	$(CC) $(CFLAGS) -c win_iconv.c
+	$(AR) rcs libiconv.a win_iconv.o
+	$(RANLIB) libiconv.a
 
 win_iconv.exe: win_iconv.c
-	gcc $(CFLAGS) -s -o win_iconv.exe win_iconv.c -DMAKE_EXE
+	$(CC) $(CFLAGS) -s -o win_iconv.exe win_iconv.c -DMAKE_EXE
 
 libmlang.a: mlang.def
-	dlltool --kill-at --input-def mlang.def --output-lib libmlang.a
+	$(DLLTOOL) --kill-at --input-def mlang.def --output-lib libmlang.a
 
 test:
-	gcc $(CFLAGS) -s -o win_iconv_test.exe win_iconv_test.c
+	$(CC) $(CFLAGS) -s -o win_iconv_test.exe win_iconv_test.c
 	./win_iconv_test.exe
 
 win_iconv.zip: msvcrt msvcr70 msvcr71
@@ -60,8 +66,9 @@ msvcr71:
 clean:
 	rm -f win_iconv.exe
 	rm -f win_iconv.o
-	rm -f iconv.dll
+	rm -f iconv.dll*
 	rm -f libiconv.a
+	rm -f libiconv.dll
 	rm -f win_iconv_test.exe
 	rm -f libmlang.a
 	rm -rf win_iconv
