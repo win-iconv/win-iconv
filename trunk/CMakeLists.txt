@@ -5,8 +5,18 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
 set(CPACK_GENERATOR "TBZ2")
 include(CPack)
+
 option(BUILD_TEST "build test executable" OFF)
-option(BUILD_STATIC "build the static lib" OFF)
+if(WINCE)
+    option(BUILD_STATIC "build the static library" ON)
+    option(BUILD_SHARED "build the shared library" OFF)
+    option(BUILD_EXECUTABLE "build the win_iconv executable" OFF)
+else(WINCE)
+    option(BUILD_STATIC "build the static library" OFF)
+    option(BUILD_SHARED "build the shared library" ON)
+    option(BUILD_EXECUTABLE "build the win_iconv executable" ON)
+endif(WINCE)
+
 if(BUILD_TEST)
     enable_testing()
 endif(BUILD_TEST)
@@ -25,21 +35,28 @@ else(NOT WINCE)
     include_directories(${WCECOMPAT_INCLUDE_DIR})
 endif(NOT WINCE)
 
-add_library(iconv SHARED win_iconv.c iconv.def)
-set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL")
+if(BUILD_SHARED)
+    add_library(iconv SHARED win_iconv.c iconv.def)
+    set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL")
+    if(WINCE)
+        target_link_libraries(iconv ${WCECOMPAT_LIBRARIES})
+    endif(WINCE)
+    install(TARGETS iconv RUNTIME DESTINATION bin
+                          LIBRARY DESTINATION lib
+                          ARCHIVE DESTINATION lib)
+endif(BUILD_SHARED)
 
-add_executable(win_iconv win_iconv.c)
-set_target_properties(win_iconv PROPERTIES COMPILE_FLAGS "-DMAKE_EXE")
+if(BUILD_EXECUTABLE)
+    add_executable(win_iconv win_iconv.c)
+    set_target_properties(win_iconv PROPERTIES COMPILE_FLAGS "-DMAKE_EXE")
+    if(WINCE)
+        target_link_libraries(win_iconv ${WCECOMPAT_LIBRARIES})
+    endif(WINCE)
+    install(TARGETS win_iconv RUNTIME DESTINATION bin
+                              LIBRARY DESTINATION lib
+                              ARCHIVE DESTINATION lib)
+endif(NOT BUILD_STATIC)
 
-if(WINCE)
-    target_link_libraries(iconv ${WCECOMPAT_LIBRARIES})
-    target_link_libraries(win_iconv ${WCECOMPAT_LIBRARIES})
-endif(WINCE)
-
-install(TARGETS iconv win_iconv RUNTIME DESTINATION bin
-                                LIBRARY DESTINATION lib
-                                ARCHIVE DESTINATION lib)
-                                                  
 if(BUILD_STATIC)
     add_library(iconv-static STATIC win_iconv.c)
     set_target_properties(iconv-static PROPERTIES OUTPUT_NAME "iconv")
