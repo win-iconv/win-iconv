@@ -55,7 +55,7 @@ if(BUILD_EXECUTABLE)
     install(TARGETS win_iconv RUNTIME DESTINATION bin
                               LIBRARY DESTINATION lib
                               ARCHIVE DESTINATION lib)
-endif(NOT BUILD_STATIC)
+endif(BUILD_EXECUTABLE)
 
 if(BUILD_STATIC)
     add_library(iconv-static STATIC win_iconv.c)
