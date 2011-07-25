@@ -1,3 +1,9 @@
+2011-07-26  Yukihiro Nakadaira
+
+	* CMakeLists.txt: fix dll name with mingw.
+	(Issue 6) (Thanks to kalevlember)
+
+
 2011-05-19  Yukihiro Nakadaira
 
 	* win_iconv.c: Add some more UCS aliases.
