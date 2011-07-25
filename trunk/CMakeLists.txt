@@ -37,7 +37,8 @@ endif(NOT WINCE)
 
 if(BUILD_SHARED)
     add_library(iconv SHARED win_iconv.c iconv.def)
-    set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL")
+    set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL"
+                                           PREFIX "")
     if(WINCE)
         target_link_libraries(iconv ${WCECOMPAT_LIBRARIES})
     endif(WINCE)
