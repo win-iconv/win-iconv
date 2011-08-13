@@ -262,6 +262,13 @@ main(int argc, char **argv)
     success("UTF-16BE", "\xFF\x41", "iso-8859-1//translit", "a");
 
     /*
+     * test for //translit
+     * Some character, not in "to" encoding -> DEFAULT CHARACTER (maybe "?")
+     */
+    eilseq("UTF-16BE", "\x30\x42", "ascii", "");
+    success("UTF-16BE", "\x30\x42", "ascii//translit", "?");
+
+    /*
      * TODO:
      * Test for state after iconv() failed.
      * Ensure iconv() error is safe and continuable.

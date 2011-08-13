@@ -1347,7 +1347,7 @@ kernel_wctomb(csconv_t *cv, ushort *wbuf, int wbufsize, uchar *buf, int bufsize)
             return seterror(E2BIG);
         return seterror(EILSEQ);
     }
-    else if (usedDefaultChar)
+    else if (usedDefaultChar && !(cv->flags & FLAG_TRANSLIT))
         return seterror(EILSEQ);
     else if (cv->mblen(cv, buf, len) != len) /* validate result */
         return seterror(EILSEQ);
