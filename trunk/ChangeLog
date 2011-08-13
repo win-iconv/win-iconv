@@ -1,3 +1,10 @@
+2011-08-13  Yukihiro Nakadaira
+
+	* win_iconv.c, win_iconv_test.c: Fixed a bug that //translit
+	flag does not work when transliterating to the default
+	character.
+	(Issue 9) (Thanks to j.g.rennison)
+
 2011-07-26  Yukihiro Nakadaira
 
 	* CMakeLists.txt: fix dll name with mingw.
