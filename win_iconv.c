@@ -1185,13 +1185,13 @@ MyImageDirectoryEntryToData(LPVOID Base, BOOLEAN MappedAsImage, USHORT Directory
 static HMODULE
 find_imported_module_by_funcname(HMODULE hModule, const char *funcname)
 {
-    DWORD Base;
+    size_t Base;
     ULONG Size;
     PIMAGE_IMPORT_DESCRIPTOR Imp;
     PIMAGE_THUNK_DATA Name;         /* Import Name Table */
     PIMAGE_IMPORT_BY_NAME ImpName;
 
-    Base = (DWORD)hModule;
+    Base = (size_t)hModule;
     Imp = MyImageDirectoryEntryToData(
             (LPVOID)Base,
             TRUE,
@@ -1207,7 +1207,7 @@ find_imported_module_by_funcname(HMODULE hModule, const char *funcname)
             if (!IMAGE_SNAP_BY_ORDINAL(Name->u1.Ordinal))
             {
                 ImpName = (PIMAGE_IMPORT_BY_NAME)
-                    (Base + (DWORD)Name->u1.AddressOfData);
+                    (Base + (size_t)Name->u1.AddressOfData);
                 if (strcmp((char *)ImpName->Name, funcname) == 0)
                     return GetModuleHandleA((char *)(Base + Imp->Name));
             }

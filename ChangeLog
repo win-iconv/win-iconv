@@ -1,3 +1,9 @@
+2011-08-19  Yukihiro Nakadaira
+
+	* win_iconv.c: Fixed a bug that assumption that
+	sizeof(DWORD)==sizeof(void*) in find_imported_module_by_funcname.
+	(Issue 7) (Thanks to j.g.rennison)
+
 2011-08-13  Yukihiro Nakadaira
 
 	* win_iconv.c, win_iconv_test.c: Fixed a bug that //translit
