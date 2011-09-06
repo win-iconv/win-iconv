@@ -1,9 +1,7 @@
 CC ?= gcc
 AR ?= ar
 RANLIB ?= ranlib
-DLLWRAP ?= dllwrap
 DLLTOOL ?= dlltool
-STRIP ?= strip
 
 # comma separated list (e.g. "iconv.dll,libiconv.dll")
 DEFAULT_LIBICONV_DLL ?= \"\"
@@ -18,8 +16,7 @@ dist: test win_iconv.zip
 
 iconv.dll: win_iconv.c
 	$(CC) $(CFLAGS) -c win_iconv.c -DMAKE_DLL
-	$(DLLWRAP) --dllname iconv.dll --def iconv.def win_iconv.o $(SPECS_FLAGS)
-	$(STRIP) iconv.dll
+	$(CC) -shared -o iconv.dll -Wl,-s -Wl,--out-implib=libiconv.dll.a -Wl,--export-all-symbols win_iconv.o $(SPECS_FLAGS)
 
 libiconv.a: win_iconv.c
 	$(CC) $(CFLAGS) -c win_iconv.c
