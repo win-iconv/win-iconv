@@ -1,3 +1,8 @@
+2011-09-06  Yukihiro Nakadaira
+
+	* Makefile: Improvement of the creation of the DLL.
+	(Issue 10) (Thanks to vincent.torri)
+
 2011-08-19  Yukihiro Nakadaira
 
 	* win_iconv.c: Fixed a bug that assumption that
