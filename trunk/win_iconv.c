@@ -321,6 +321,8 @@ static struct {
 
     {950, "CP950"},
     {950, "BIG5"},
+    {950, "BIG5HKSCS"},
+    {950, "BIG5-HKSCS"},
 
     {949, "CP949"},
     {949, "UHC"},
@@ -429,6 +431,8 @@ static struct {
     {936, "gb2312"}, /* ANSI/OEM Simplified Chinese (PRC, Singapore); Chinese Simplified (GB2312) */
     {949, "ks_c_5601-1987"}, /* ANSI/OEM Korean (Unified Hangul Code) */
     {950, "big5"}, /* ANSI/OEM Traditional Chinese (Taiwan; Hong Kong SAR, PRC); Chinese Traditional (Big5) */
+    {950, "big5hkscs"}, /* ANSI/OEM Traditional Chinese (Hong Kong SAR); Chinese Traditional (Big5-HKSCS) */
+    {950, "big5-hkscs"}, /* alternative name for it */
     {1026, "IBM1026"}, /* IBM EBCDIC Turkish (Latin 5) */
     {1047, "IBM01047"}, /* IBM EBCDIC Latin 1/Open System */
     {1140, "IBM01140"}, /* IBM EBCDIC US-Canada (037 + Euro symbol); IBM EBCDIC (US-Canada-Euro) */
