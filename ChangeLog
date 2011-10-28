@@ -1,3 +1,8 @@
+2011-10-28  Yukihiro Nakadaira
+
+	* win_iconv.c: Add UCS-2.
+	(Issue 14) (Thanks to j.g.rennison)
+
 2011-10-24  Yukihiro Nakadaira
 
 	* win_iconv.c: Add Big5-HKSCS alias.
