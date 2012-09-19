@@ -87,10 +87,10 @@ check_enc(const char *encname, int codepage)
 }
 
 void
-test(const char *from, const char *fromstr, int fromsize, const char *to, const char *tostr, int tosize, int errcode, int bufsize, int line)
+test(const char *from, char *fromstr, int fromsize, const char *to, const char *tostr, int tosize, int errcode, int bufsize, int line)
 {
     char outbuf[BUFSIZ];
-    const char *pin;
+    char *pin;
     char *pout;
     size_t inbytesleft;
     size_t outbytesleft;

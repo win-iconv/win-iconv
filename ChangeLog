@@ -1,3 +1,9 @@
+2012-09-19  Yukihiro Nakadaira
+
+	* iconv.h, win_iconv.c, win_iconv_test.c: Change iconv(3) prototype.
+	"const char **inbuf" -> "char **inbuf"
+	(Issue 8)
+
 2011-10-28  Yukihiro Nakadaira
 
 	* win_iconv.c: Add UCS-2.
