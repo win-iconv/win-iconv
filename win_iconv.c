@@ -15,6 +15,11 @@
 #include <string.h>
 #include <stdlib.h>
 
+/* WORKAROUND: */
+#ifndef UNDER_CE
+#define GetProcAddressA GetProcAddress
+#endif
+
 #if 0
 # define MAKE_EXE
 # define MAKE_DLL
@@ -682,12 +687,12 @@ load_mlang()
     h = LoadLibrary(TEXT("mlang.dll"));
     if (!h)
         return FALSE;
-    ConvertINetString = (CONVERTINETSTRING)GetProcAddress(h, TEXT("ConvertINetString"));
-    ConvertINetMultiByteToUnicode = (CONVERTINETMULTIBYTETOUNICODE)GetProcAddress(h, TEXT("ConvertINetMultiByteToUnicode"));
-    ConvertINetUnicodeToMultiByte = (CONVERTINETUNICODETOMULTIBYTE)GetProcAddress(h, TEXT("ConvertINetUnicodeToMultiByte"));
-    IsConvertINetStringAvailable = (ISCONVERTINETSTRINGAVAILABLE)GetProcAddress(h, TEXT("IsConvertINetStringAvailable"));
-    LcidToRfc1766A = (LCIDTORFC1766A)GetProcAddress(h, TEXT("LcidToRfc1766A"));
-    Rfc1766ToLcidA = (RFC1766TOLCIDA)GetProcAddress(h, TEXT("Rfc1766ToLcidA"));
+    ConvertINetString = (CONVERTINETSTRING)GetProcAddressA(h, "ConvertINetString");
+    ConvertINetMultiByteToUnicode = (CONVERTINETMULTIBYTETOUNICODE)GetProcAddressA(h, "ConvertINetMultiByteToUnicode");
+    ConvertINetUnicodeToMultiByte = (CONVERTINETUNICODETOMULTIBYTE)GetProcAddressA(h, "ConvertINetUnicodeToMultiByte");
+    IsConvertINetStringAvailable = (ISCONVERTINETSTRINGAVAILABLE)GetProcAddressA(h, "IsConvertINetStringAvailable");
+    LcidToRfc1766A = (LCIDTORFC1766A)GetProcAddressA(h, "LcidToRfc1766A");
+    Rfc1766ToLcidA = (RFC1766TOLCIDA)GetProcAddressA(h, "Rfc1766ToLcidA");
     return TRUE;
 }
 
@@ -1134,16 +1139,16 @@ libiconv_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode)
     if (hmsvcrt == NULL)
         goto failed;
 
-    _iconv_open = (f_iconv_open)GetProcAddress(hlibiconv, TEXT("libiconv_open"));
+    _iconv_open = (f_iconv_open)GetProcAddressA(hlibiconv, "libiconv_open");
     if (_iconv_open == NULL)
-        _iconv_open = (f_iconv_open)GetProcAddress(hlibiconv, TEXT("iconv_open"));
-    cd->iconv_close = (f_iconv_close)GetProcAddress(hlibiconv, TEXT("libiconv_close"));
+        _iconv_open = (f_iconv_open)GetProcAddressA(hlibiconv, "iconv_open");
+    cd->iconv_close = (f_iconv_close)GetProcAddressA(hlibiconv, "libiconv_close");
     if (cd->iconv_close == NULL)
-        cd->iconv_close = (f_iconv_close)GetProcAddress(hlibiconv, TEXT("iconv_close"));
-    cd->iconv = (f_iconv)GetProcAddress(hlibiconv, TEXT("libiconv"));
+        cd->iconv_close = (f_iconv_close)GetProcAddressA(hlibiconv, "iconv_close");
+    cd->iconv = (f_iconv)GetProcAddressA(hlibiconv, "libiconv");
     if (cd->iconv == NULL)
-        cd->iconv = (f_iconv)GetProcAddress(hlibiconv, TEXT("iconv"));
-    cd->_errno = (f_errno)GetProcAddress(hmsvcrt, TEXT("_errno"));
+        cd->iconv = (f_iconv)GetProcAddressA(hlibiconv, "iconv");
+    cd->_errno = (f_errno)GetProcAddressA(hmsvcrt, "_errno");
     if (_iconv_open == NULL || cd->iconv_close == NULL
             || cd->iconv == NULL || cd->_errno == NULL)
         goto failed;
