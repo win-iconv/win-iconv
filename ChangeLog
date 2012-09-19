@@ -7,6 +7,8 @@
 	* win_iconv.c: Change to not use TEXT macro for GetProcAddress.
 	(Issue 17) (Thanks to EPienkowskia)
 
+	* win_iconv_test.c: Fix for -DUNICODE.  Use GetModuleFileNameA.
+
 2011-10-28  Yukihiro Nakadaira
 
 	* win_iconv.c: Add UCS-2.
