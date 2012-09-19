@@ -109,7 +109,7 @@ test(const char *from, char *fromstr, int fromsize, const char *to, const char *
 
 #ifdef USE_LIBICONV_DLL
     if (((rec_iconv_t *)cd)->hlibiconv != NULL)
-        GetModuleFileName(((rec_iconv_t *)cd)->hlibiconv, dllpath, sizeof(dllpath));
+        GetModuleFileNameA(((rec_iconv_t *)cd)->hlibiconv, dllpath, sizeof(dllpath));
 
     if (use_dll && ((rec_iconv_t *)cd)->hlibiconv == NULL)
     {
