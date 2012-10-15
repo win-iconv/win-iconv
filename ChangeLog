@@ -1,3 +1,7 @@
+2012-10-15  Yukihiro Nakadaira
+
+	* win_iconv.c, win_iconv_test.c: cosmetic change.
+
 2012-09-19  Yukihiro Nakadaira
 
 	* iconv.h, win_iconv.c, win_iconv_test.c: Change iconv(3) prototype.

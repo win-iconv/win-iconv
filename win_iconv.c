@@ -1073,7 +1073,7 @@ xstrndup(const char *s, size_t n)
 {
     char *p;
 
-    p = malloc(n + 1);
+    p = (char *)malloc(n + 1);
     if (p == NULL)
         return NULL;
     memcpy(p, s, n);
@@ -1196,14 +1196,14 @@ MyImageDirectoryEntryToData(LPVOID Base, BOOLEAN MappedAsImage, USHORT Directory
 static HMODULE
 find_imported_module_by_funcname(HMODULE hModule, const char *funcname)
 {
-    size_t Base;
+    DWORD_PTR Base;
     ULONG Size;
     PIMAGE_IMPORT_DESCRIPTOR Imp;
     PIMAGE_THUNK_DATA Name;         /* Import Name Table */
     PIMAGE_IMPORT_BY_NAME ImpName;
 
-    Base = (size_t)hModule;
-    Imp = MyImageDirectoryEntryToData(
+    Base = (DWORD_PTR)hModule;
+    Imp = (PIMAGE_IMPORT_DESCRIPTOR)MyImageDirectoryEntryToData(
             (LPVOID)Base,
             TRUE,
             IMAGE_DIRECTORY_ENTRY_IMPORT,
@@ -1218,7 +1218,7 @@ find_imported_module_by_funcname(HMODULE hModule, const char *funcname)
             if (!IMAGE_SNAP_BY_ORDINAL(Name->u1.Ordinal))
             {
                 ImpName = (PIMAGE_IMPORT_BY_NAME)
-                    (Base + (size_t)Name->u1.AddressOfData);
+                    (Base + (DWORD_PTR)Name->u1.AddressOfData);
                 if (strcmp((char *)ImpName->Name, funcname) == 0)
                     return GetModuleHandleA((char *)(Base + Imp->Name));
             }
