@@ -1,7 +1,19 @@
+# Makefile for win-iconv
+#
+# Variables that can be overriden:
+#
+# CC, AR, RANLIB, DLLTOOL
+# MKDIR_P, INSTALL, RM
+# prefix, BINARY_PATH, INCLUDE_PATH, LIBRARY_PATH
+
 CC ?= gcc
 AR ?= ar
 RANLIB ?= ranlib
 DLLTOOL ?= dlltool
+
+MKDIR_P = mkdir -p
+INSTALL = install -c
+RM = rm -f
 
 # comma separated list (e.g. "iconv.dll,libiconv.dll")
 DEFAULT_LIBICONV_DLL ?= \"\"
@@ -9,6 +21,11 @@ DEFAULT_LIBICONV_DLL ?= \"\"
 CFLAGS += -pedantic -Wall
 CFLAGS += -DUSE_LIBICONV_DLL
 CFLAGS += -DDEFAULT_LIBICONV_DLL=$(DEFAULT_LIBICONV_DLL)
+
+prefix ?= /usr/local
+BINARY_PATH = $(prefix)/bin
+INCLUDE_PATH = $(prefix)/include
+LIBRARY_PATH = $(prefix)/lib
 
 all: iconv.dll libiconv.a win_iconv.exe
 
@@ -59,6 +76,23 @@ msvcr71:
 	cd msvcr71; \
 	gcc -dumpspecs | sed s/-lmsvcrt/-lmsvcr71/ > specs; \
 	$(MAKE) "SPECS_FLAGS=-specs=$$PWD/specs";
+
+install: iconv.dll libiconv.a win_iconv.exe
+	-@$(MKDIR_P) '$(DESTDIR)$(BINARY_PATH)'
+	-@$(MKDIR_P) '$(DESTDIR)$(INCLUDE_PATH)'
+	-@$(MKDIR_P) '$(DESTDIR)$(LIBRARY_PATH)'
+	-$(INSTALL) iconv.dll '$(DESTDIR)$(BINARY_PATH)'
+	-$(INSTALL) win_iconv.exe '$(DESTDIR)$(BINARY_PATH)'
+	-$(INSTALL) iconv.h '$(DESTDIR)$(INCLUDE_PATH)'
+	-$(INSTALL) libiconv.dll.a '$(DESTDIR)$(LIBRARY_PATH)'
+	-$(INSTALL) libiconv.a '$(DESTDIR)$(LIBRARY_PATH)'
+
+uninstall:
+	-$(RM) '$(DESTDIR)$(LIBRARY_PATH)'/libiconv.a
+	-$(RM) '$(DESTDIR)$(LIBRARY_PATH)'/libiconv.dll.a
+	-$(RM) '$(DESTDIR)$(INCLUDE_PATH)'/iconv.h
+	-$(RM) '$(DESTDIR)$(BINARY_PATH)'/win_iconv.exe
+	-$(RM) '$(DESTDIR)$(BINARY_PATH)'/iconv.dll
 
 clean:
 	rm -f win_iconv.exe
