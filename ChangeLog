@@ -1,3 +1,7 @@
+2012-10-21  Yukihiro Nakadaira
+
+	* win_iconv.c, win_iconv_test.c: Add //ignore and -c flag.
+
 2012-10-15  Yukihiro Nakadaira
 
 	* win_iconv.c, win_iconv_test.c: cosmetic change.
