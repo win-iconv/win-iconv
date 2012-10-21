@@ -37,7 +37,7 @@
 
 #define FLAG_USE_BOM            1
 #define FLAG_TRANSLIT           2 /* //TRANSLIT */
-#define FLAG_IGNORE             4 /* //IGNORE (not implemented) */
+#define FLAG_IGNORE             4 /* //IGNORE */
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -786,8 +786,15 @@ win_iconv(iconv_t _cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t 
             outsize = cd->to.flush(&cd->to, (uchar *)*outbuf, *outbytesleft);
             if (outsize == -1)
             {
-                cd->to.mode = tomode;
-                return (size_t)(-1);
+                if ((cd->to.flags & FLAG_IGNORE) && errno != E2BIG)
+                {
+                    outsize = 0;
+                }
+                else
+                {
+                    cd->to.mode = tomode;
+                    return (size_t)(-1);
+                }
             }
             *outbuf += outsize;
             *outbytesleft -= outsize;
@@ -806,8 +813,17 @@ win_iconv(iconv_t _cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t 
         insize = cd->from.mbtowc(&cd->from, (const uchar *)*inbuf, *inbytesleft, wbuf, &wsize);
         if (insize == -1)
         {
-            cd->from.mode = frommode;
-            return (size_t)(-1);
+            if (cd->to.flags & FLAG_IGNORE)
+            {
+                cd->from.mode = frommode;
+                insize = 1;
+                wsize = 0;
+            }
+            else
+            {
+                cd->from.mode = frommode;
+                return (size_t)(-1);
+            }
         }
 
         if (wsize == 0)
@@ -848,9 +864,17 @@ win_iconv(iconv_t _cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t 
         outsize = cd->to.wctomb(&cd->to, wbuf, wsize, (uchar *)*outbuf, *outbytesleft);
         if (outsize == -1)
         {
-            cd->from.mode = frommode;
-            cd->to.mode = tomode;
-            return (size_t)(-1);
+            if ((cd->to.flags & FLAG_IGNORE) && errno != E2BIG)
+            {
+                cd->to.mode = tomode;
+                outsize = 0;
+            }
+            else
+            {
+                cd->from.mode = frommode;
+                cd->to.mode = tomode;
+                return (size_t)(-1);
+            }
         }
 
         *inbuf += insize;
@@ -1917,6 +1941,8 @@ main(int argc, char **argv)
     iconv_t cd;
     size_t r;
     FILE *in = stdin;
+    int ignore = 0;
+    char *p;
 
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
@@ -1934,6 +1960,8 @@ main(int argc, char **argv)
             fromcode = argv[++i];
         else if (strcmp(argv[i], "-t") == 0)
             tocode = argv[++i];
+        else if (strcmp(argv[i], "-c") == 0)
+            ignore = 1;
         else
         {
             in = fopen(argv[i], "rb");
@@ -1948,8 +1976,21 @@ main(int argc, char **argv)
 
     if (fromcode == NULL || tocode == NULL)
     {
-        printf("usage: %s -f from-enc -t to-enc [file]\n", argv[0]);
+        printf("usage: %s [-c] -f from-enc -t to-enc [file]\n", argv[0]);
         return 0;
+    }
+
+    if (ignore)
+    {
+        p = tocode;
+        tocode = (char *)malloc(strlen(p) + strlen("//IGNORE") + 1);
+        if (tocode == NULL)
+        {
+            perror("fatal error");
+            return 1;
+        }
+        strcpy(tocode, p);
+        strcat(tocode, "//IGNORE");
     }
 
     cd = iconv_open(tocode, fromcode);
