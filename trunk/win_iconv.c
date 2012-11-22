@@ -15,6 +15,12 @@
 #include <string.h>
 #include <stdlib.h>
 
+#ifdef __GNUC__
+#define UNUSED __attribute__((unused))
+#else
+#define UNUSED
+#endif
+
 /* WORKAROUND: */
 #ifndef UNDER_CE
 #define GetProcAddressA GetProcAddress
@@ -109,7 +115,7 @@ static int win_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromc
 static int win_iconv_close(iconv_t cd);
 static size_t win_iconv(iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
 
-static int load_mlang();
+static int load_mlang(void);
 static int make_csconv(const char *name, csconv_t *cv);
 static int name_to_codepage(const char *name);
 static uint utf16_to_ucs4(const ushort *wbuf);
@@ -679,7 +685,7 @@ static LCIDTORFC1766A LcidToRfc1766A;
 static RFC1766TOLCIDA Rfc1766ToLcidA;
 
 static int
-load_mlang()
+load_mlang(void)
 {
     HMODULE h;
     if (ConvertINetString != NULL)
@@ -759,7 +765,7 @@ win_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode)
 }
 
 static int
-win_iconv_close(iconv_t cd)
+win_iconv_close(iconv_t cd UNUSED)
 {
     return 0;
 }
@@ -1253,7 +1259,7 @@ find_imported_module_by_funcname(HMODULE hModule, const char *funcname)
 #endif
 
 static int
-sbcs_mblen(csconv_t *cv, const uchar *buf, int bufsize)
+sbcs_mblen(csconv_t *cv UNUSED, const uchar *buf UNUSED, int bufsize UNUSED)
 {
     return 1;
 }
@@ -1290,7 +1296,7 @@ mbcs_mblen(csconv_t *cv, const uchar *buf, int bufsize)
 }
 
 static int
-utf8_mblen(csconv_t *cv, const uchar *buf, int bufsize)
+utf8_mblen(csconv_t *cv UNUSED, const uchar *buf, int bufsize)
 {
     int len = 0;
 
@@ -1309,7 +1315,7 @@ utf8_mblen(csconv_t *cv, const uchar *buf, int bufsize)
 }
 
 static int
-eucjp_mblen(csconv_t *cv, const uchar *buf, int bufsize)
+eucjp_mblen(csconv_t *cv UNUSED, const uchar *buf, int bufsize)
 {
     if (buf[0] < 0x80) /* ASCII */
         return 1;
