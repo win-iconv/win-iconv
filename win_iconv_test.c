@@ -269,13 +269,6 @@ main(int argc, char **argv)
     success("UTF-16BE", "\x30\x42", "ascii//translit", "?");
 
     /*
-     * test for //ignore
-     */
-    eilseq("UTF-8", "\xFF A \xFF B", "ascii//ignore", " A  B");
-    eilseq("UTF-8", "\xEF\xBC\xA1 A \xEF\xBC\xA2 B", "ascii//ignore", " A  B");
-    eilseq("UTF-8", "\xEF\x01 A \xEF\x02 B", "ascii//ignore", "\x01 A \x02 B");
-
-    /*
      * TODO:
      * Test for state after iconv() failed.
      * Ensure iconv() error is safe and continuable.

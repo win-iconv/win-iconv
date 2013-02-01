@@ -15,12 +15,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#ifdef __GNUC__
-#define UNUSED __attribute__((unused))
-#else
-#define UNUSED
-#endif
-
 /* WORKAROUND: */
 #ifndef UNDER_CE
 #define GetProcAddressA GetProcAddress
@@ -43,7 +37,7 @@
 
 #define FLAG_USE_BOM            1
 #define FLAG_TRANSLIT           2 /* //TRANSLIT */
-#define FLAG_IGNORE             4 /* //IGNORE */
+#define FLAG_IGNORE             4 /* //IGNORE (not implemented) */
 
 typedef unsigned char uchar;
 typedef unsigned short ushort;
@@ -53,7 +47,7 @@ typedef void* iconv_t;
 
 iconv_t iconv_open(const char *tocode, const char *fromcode);
 int iconv_close(iconv_t cd);
-size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+size_t iconv(iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
 
 /* libiconv interface for vim */
 #if defined(MAKE_DLL)
@@ -71,7 +65,7 @@ typedef struct rec_iconv_t rec_iconv_t;
 
 typedef iconv_t (*f_iconv_open)(const char *tocode, const char *fromcode);
 typedef int (*f_iconv_close)(iconv_t cd);
-typedef size_t (*f_iconv)(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+typedef size_t (*f_iconv)(iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
 typedef int* (*f_errno)(void);
 typedef int (*f_mbtowc)(csconv_t *cv, const uchar *buf, int bufsize, ushort *wbuf, int *wbufsize);
 typedef int (*f_wctomb)(csconv_t *cv, ushort *wbuf, int wbufsize, uchar *buf, int bufsize);
@@ -113,9 +107,9 @@ struct rec_iconv_t {
 
 static int win_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode);
 static int win_iconv_close(iconv_t cd);
-static size_t win_iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+static size_t win_iconv(iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
 
-static int load_mlang(void);
+static int load_mlang();
 static int make_csconv(const char *name, csconv_t *cv);
 static int name_to_codepage(const char *name);
 static uint utf16_to_ucs4(const ushort *wbuf);
@@ -685,7 +679,7 @@ static LCIDTORFC1766A LcidToRfc1766A;
 static RFC1766TOLCIDA Rfc1766ToLcidA;
 
 static int
-load_mlang(void)
+load_mlang()
 {
     HMODULE h;
     if (ConvertINetString != NULL)
@@ -744,7 +738,7 @@ iconv_close(iconv_t _cd)
 }
 
 size_t
-iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
+iconv(iconv_t _cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
 {
     rec_iconv_t *cd = (rec_iconv_t *)_cd;
     size_t r = cd->iconv(cd->cd, inbuf, inbytesleft, outbuf, outbytesleft);
@@ -765,13 +759,13 @@ win_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode)
 }
 
 static int
-win_iconv_close(iconv_t cd UNUSED)
+win_iconv_close(iconv_t cd)
 {
     return 0;
 }
 
 static size_t
-win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
+win_iconv(iconv_t _cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
 {
     rec_iconv_t *cd = (rec_iconv_t *)_cd;
     ushort wbuf[MB_CHAR_MAX]; /* enough room for one character */
@@ -792,15 +786,8 @@ win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, s
             outsize = cd->to.flush(&cd->to, (uchar *)*outbuf, *outbytesleft);
             if (outsize == -1)
             {
-                if ((cd->to.flags & FLAG_IGNORE) && errno != E2BIG)
-                {
-                    outsize = 0;
-                }
-                else
-                {
-                    cd->to.mode = tomode;
-                    return (size_t)(-1);
-                }
+                cd->to.mode = tomode;
+                return (size_t)(-1);
             }
             *outbuf += outsize;
             *outbytesleft -= outsize;
@@ -819,17 +806,8 @@ win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, s
         insize = cd->from.mbtowc(&cd->from, (const uchar *)*inbuf, *inbytesleft, wbuf, &wsize);
         if (insize == -1)
         {
-            if (cd->to.flags & FLAG_IGNORE)
-            {
-                cd->from.mode = frommode;
-                insize = 1;
-                wsize = 0;
-            }
-            else
-            {
-                cd->from.mode = frommode;
-                return (size_t)(-1);
-            }
+            cd->from.mode = frommode;
+            return (size_t)(-1);
         }
 
         if (wsize == 0)
@@ -870,17 +848,9 @@ win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, s
         outsize = cd->to.wctomb(&cd->to, wbuf, wsize, (uchar *)*outbuf, *outbytesleft);
         if (outsize == -1)
         {
-            if ((cd->to.flags & FLAG_IGNORE) && errno != E2BIG)
-            {
-                cd->to.mode = tomode;
-                outsize = 0;
-            }
-            else
-            {
-                cd->from.mode = frommode;
-                cd->to.mode = tomode;
-                return (size_t)(-1);
-            }
+            cd->from.mode = frommode;
+            cd->to.mode = tomode;
+            return (size_t)(-1);
         }
 
         *inbuf += insize;
@@ -966,7 +936,7 @@ make_csconv(const char *_name, csconv_t *cv)
             cv->mblen = sbcs_mblen;
         else if (cpinfo.MaxCharSize == 2)
             cv->mblen = dbcs_mblen;
-        else
+	else
 	    cv->mblen = mbcs_mblen;
     }
     else
@@ -1259,7 +1229,7 @@ find_imported_module_by_funcname(HMODULE hModule, const char *funcname)
 #endif
 
 static int
-sbcs_mblen(csconv_t *cv UNUSED, const uchar *buf UNUSED, int bufsize UNUSED)
+sbcs_mblen(csconv_t *cv, const uchar *buf, int bufsize)
 {
     return 1;
 }
@@ -1296,7 +1266,7 @@ mbcs_mblen(csconv_t *cv, const uchar *buf, int bufsize)
 }
 
 static int
-utf8_mblen(csconv_t *cv UNUSED, const uchar *buf, int bufsize)
+utf8_mblen(csconv_t *cv, const uchar *buf, int bufsize)
 {
     int len = 0;
 
@@ -1315,7 +1285,7 @@ utf8_mblen(csconv_t *cv UNUSED, const uchar *buf, int bufsize)
 }
 
 static int
-eucjp_mblen(csconv_t *cv UNUSED, const uchar *buf, int bufsize)
+eucjp_mblen(csconv_t *cv, const uchar *buf, int bufsize)
 {
     if (buf[0] < 0x80) /* ASCII */
         return 1;
@@ -1947,9 +1917,6 @@ main(int argc, char **argv)
     iconv_t cd;
     size_t r;
     FILE *in = stdin;
-    FILE *out = stdout;
-    int ignore = 0;
-    char *p;
 
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
@@ -1967,17 +1934,6 @@ main(int argc, char **argv)
             fromcode = argv[++i];
         else if (strcmp(argv[i], "-t") == 0)
             tocode = argv[++i];
-        else if (strcmp(argv[i], "-c") == 0)
-            ignore = 1;
-        else if (strcmp(argv[i], "--output") == 0)
-        {
-            out = fopen(argv[++i], "wb");
-            if(out == NULL)
-            {
-                fprintf(stderr, "cannot open %s\n", argv[i]);
-                return 1;
-            }
-        }
         else
         {
             in = fopen(argv[i], "rb");
@@ -1992,21 +1948,8 @@ main(int argc, char **argv)
 
     if (fromcode == NULL || tocode == NULL)
     {
-        printf("usage: %s [-c] -f from-enc -t to-enc [file]\n", argv[0]);
+        printf("usage: %s -f from-enc -t to-enc [file]\n", argv[0]);
         return 0;
-    }
-
-    if (ignore)
-    {
-        p = tocode;
-        tocode = (char *)malloc(strlen(p) + strlen("//IGNORE") + 1);
-        if (tocode == NULL)
-        {
-            perror("fatal error");
-            return 1;
-        }
-        strcpy(tocode, p);
-        strcat(tocode, "//IGNORE");
     }
 
     cd = iconv_open(tocode, fromcode);
@@ -2024,7 +1967,7 @@ main(int argc, char **argv)
         pout = outbuf;
         outbytesleft = sizeof(outbuf);
         r = iconv(cd, &pin, &inbytesleft, &pout, &outbytesleft);
-        fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, out);
+        fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, stdout);
         if (r == (size_t)(-1) && errno != E2BIG && (errno != EINVAL || feof(in)))
         {
             perror("conversion error");
@@ -2036,7 +1979,7 @@ main(int argc, char **argv)
     pout = outbuf;
     outbytesleft = sizeof(outbuf);
     r = iconv(cd, NULL, NULL, &pout, &outbytesleft);
-    fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, out);
+    fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, stdout);
     if (r == (size_t)(-1))
     {
         perror("conversion error");
