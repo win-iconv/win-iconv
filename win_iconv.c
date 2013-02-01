@@ -53,7 +53,7 @@ typedef void* iconv_t;
 
 iconv_t iconv_open(const char *tocode, const char *fromcode);
 int iconv_close(iconv_t cd);
-size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+size_t iconv(iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
 
 /* libiconv interface for vim */
 #if defined(MAKE_DLL)
@@ -71,7 +71,7 @@ typedef struct rec_iconv_t rec_iconv_t;
 
 typedef iconv_t (*f_iconv_open)(const char *tocode, const char *fromcode);
 typedef int (*f_iconv_close)(iconv_t cd);
-typedef size_t (*f_iconv)(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+typedef size_t (*f_iconv)(iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
 typedef int* (*f_errno)(void);
 typedef int (*f_mbtowc)(csconv_t *cv, const uchar *buf, int bufsize, ushort *wbuf, int *wbufsize);
 typedef int (*f_wctomb)(csconv_t *cv, ushort *wbuf, int wbufsize, uchar *buf, int bufsize);
@@ -113,7 +113,7 @@ struct rec_iconv_t {
 
 static int win_iconv_open(rec_iconv_t *cd, const char *tocode, const char *fromcode);
 static int win_iconv_close(iconv_t cd);
-static size_t win_iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
+static size_t win_iconv(iconv_t cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft);
 
 static int load_mlang(void);
 static int make_csconv(const char *name, csconv_t *cv);
@@ -744,7 +744,7 @@ iconv_close(iconv_t _cd)
 }
 
 size_t
-iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
+iconv(iconv_t _cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
 {
     rec_iconv_t *cd = (rec_iconv_t *)_cd;
     size_t r = cd->iconv(cd->cd, inbuf, inbytesleft, outbuf, outbytesleft);
@@ -771,7 +771,7 @@ win_iconv_close(iconv_t cd UNUSED)
 }
 
 static size_t
-win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
+win_iconv(iconv_t _cd, char **inbuf, size_t *inbytesleft, char **outbuf, size_t *outbytesleft)
 {
     rec_iconv_t *cd = (rec_iconv_t *)_cd;
     ushort wbuf[MB_CHAR_MAX]; /* enough room for one character */
@@ -966,7 +966,7 @@ make_csconv(const char *_name, csconv_t *cv)
             cv->mblen = sbcs_mblen;
         else if (cpinfo.MaxCharSize == 2)
             cv->mblen = dbcs_mblen;
-        else
+	else
 	    cv->mblen = mbcs_mblen;
     }
     else
@@ -1947,7 +1947,6 @@ main(int argc, char **argv)
     iconv_t cd;
     size_t r;
     FILE *in = stdin;
-    FILE *out = stdout;
     int ignore = 0;
     char *p;
 
@@ -1969,15 +1968,6 @@ main(int argc, char **argv)
             tocode = argv[++i];
         else if (strcmp(argv[i], "-c") == 0)
             ignore = 1;
-        else if (strcmp(argv[i], "--output") == 0)
-        {
-            out = fopen(argv[++i], "wb");
-            if(out == NULL)
-            {
-                fprintf(stderr, "cannot open %s\n", argv[i]);
-                return 1;
-            }
-        }
         else
         {
             in = fopen(argv[i], "rb");
@@ -2024,7 +2014,7 @@ main(int argc, char **argv)
         pout = outbuf;
         outbytesleft = sizeof(outbuf);
         r = iconv(cd, &pin, &inbytesleft, &pout, &outbytesleft);
-        fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, out);
+        fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, stdout);
         if (r == (size_t)(-1) && errno != E2BIG && (errno != EINVAL || feof(in)))
         {
             perror("conversion error");
@@ -2036,7 +2026,7 @@ main(int argc, char **argv)
     pout = outbuf;
     outbytesleft = sizeof(outbuf);
     r = iconv(cd, NULL, NULL, &pout, &outbytesleft);
-    fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, out);
+    fwrite(outbuf, 1, sizeof(outbuf) - outbytesleft, stdout);
     if (r == (size_t)(-1))
     {
         perror("conversion error");
