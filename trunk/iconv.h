@@ -11,4 +11,4 @@ size_t iconv(iconv_t cd, const char **inbuf, size_t *inbytesleft, char **outbuf,
 #ifdef __cplusplus
 }
 #endif
-#endif//_LIBICONV_H
+#endif
