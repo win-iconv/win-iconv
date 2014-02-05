@@ -90,7 +90,7 @@ void
 test(const char *from, const char *fromstr, int fromsize, const char *to, const char *tostr, int tosize, int errcode, int bufsize, int line)
 {
     char outbuf[BUFSIZ];
-    char *pin;
+    const char *pin;
     char *pout;
     size_t inbytesleft;
     size_t outbytesleft;

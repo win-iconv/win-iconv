@@ -1963,7 +1963,7 @@ main(int argc, char **argv)
     int i;
     char inbuf[BUFSIZ];
     char outbuf[BUFSIZ];
-    char *pin;
+    const char *pin;
     char *pout;
     size_t inbytesleft;
     size_t outbytesleft;

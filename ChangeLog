@@ -1,6 +1,7 @@
 2014-02-05  Yukihiro Nakadaira
 
 	* win_iconv.c: Added alias.  ISO_8859-* ISO_8859_*
+	* win_iconv.c, win_iconv_test.c: Fixed for compiler warning.
 
 2013-09-15  Yukihiro Nakadaira
 
