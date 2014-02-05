@@ -1,3 +1,7 @@
+2014-02-05  Yukihiro Nakadaira
+
+	* win_iconv.c: Added alias.  ISO_8859-* ISO_8859_*
+
 2013-09-15  Yukihiro Nakadaira
 
 	* iconv.h: Fixed c++ style comment. (Issue 21) (Thanks to bgilbert)
