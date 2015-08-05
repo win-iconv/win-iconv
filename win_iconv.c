@@ -1093,7 +1093,7 @@ mbtowc_flags(int codepage)
 /*
  * Check if codepage is one those for which the lpUsedDefaultChar
  * parameter to WideCharToMultiByte() must be NULL.  The docs in
- * Platform SDK for for Windows Server 2003 R2 claims that this is the
+ * Platform SDK for Windows Server 2003 R2 claims that this is the
  * list below, while the MSDN docs for MSVS2008 claim that it is only
  * for 65000 (UTF-7) and 65001 (UTF-8). This time the earlier Platform
  * SDK seems to be correct, at least for XP.
