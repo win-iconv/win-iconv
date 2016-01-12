@@ -181,8 +181,8 @@ main(int argc, char **argv)
     if (check_enc("ascii", 20127))
     {
         success("ascii", "ABC", "ascii", "ABC");
-        /* MSB is dropped.  Hmm... */
-        success("ascii", "\x80\xFF", "ascii", "\x00\x7F");
+        eilseq("ascii", "\x80", "ascii", "");
+        eilseq("ascii", "\xFF", "ascii", "");
     }
 
     /* unicode (CP1200 CP1201 CP12000 CP12001 CP65001) */
