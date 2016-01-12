@@ -1,3 +1,8 @@
+2016-01-12  Yukihiro Nakadaira
+
+	* win_iconv.c, win_iconv_test.c: Make >=0x80 byte illegal in ascii.
+	* iconv.h: Add WINICONV_CONST macro.
+
 2014-02-05  Yukihiro Nakadaira
 
 	* win_iconv.c: Added alias.  ISO_8859-* ISO_8859_*
