@@ -1380,7 +1380,7 @@ kernel_mbtowc(csconv_t *cv, const uchar *buf, int bufsize, ushort *wbuf, int *wb
      * know that the mblen function is sbcs_mblen() so len is 1.
      */
     if (cv->codepage == 20127 && buf[0] >= 0x80)
-            return_error(EILSEQ);
+        return seterror(EILSEQ);
     *wbufsize = MultiByteToWideChar(cv->codepage, mbtowc_flags (cv->codepage),
             (const char *)buf, len, (wchar_t *)wbuf, *wbufsize);
     if (*wbufsize == 0)
