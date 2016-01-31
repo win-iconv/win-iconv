@@ -6,6 +6,7 @@
 #  define WINICONV_CONST ICONV_CONST
 # else
 #  define WINICONV_CONST const
+# endif
 #endif
 #ifdef __cplusplus
 extern "C" {
