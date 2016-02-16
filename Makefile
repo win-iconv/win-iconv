@@ -83,9 +83,9 @@ install: iconv.dll libiconv.a win_iconv.exe
 	-@$(MKDIR_P) '$(DESTDIR)$(LIBRARY_PATH)'
 	-$(INSTALL) iconv.dll '$(DESTDIR)$(BINARY_PATH)'
 	-$(INSTALL) win_iconv.exe '$(DESTDIR)$(BINARY_PATH)'
-	-$(INSTALL) iconv.h '$(DESTDIR)$(INCLUDE_PATH)'
-	-$(INSTALL) libiconv.dll.a '$(DESTDIR)$(LIBRARY_PATH)'
-	-$(INSTALL) libiconv.a '$(DESTDIR)$(LIBRARY_PATH)'
+	-$(INSTALL) -m 0644 iconv.h '$(DESTDIR)$(INCLUDE_PATH)'
+	-$(INSTALL) -m 0644 libiconv.dll.a '$(DESTDIR)$(LIBRARY_PATH)'
+	-$(INSTALL) -m 0644 libiconv.a '$(DESTDIR)$(LIBRARY_PATH)'
 
 uninstall:
 	-$(RM) '$(DESTDIR)$(LIBRARY_PATH)'/libiconv.a
