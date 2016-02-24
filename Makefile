@@ -1,6 +1,6 @@
 # Makefile for win-iconv
 #
-# Variables that can be overriden:
+# Variables that can be overridden:
 #
 # CC, AR, RANLIB, DLLTOOL
 # MKDIR_P, INSTALL, RM
