@@ -165,6 +165,7 @@ static struct {
     {1200, "UTF-16LE"},
     {1200, "UCS2LE"},
     {1200, "UCS-2LE"},
+    {1200, "UCS-2-INTERNAL"},
 
     {1201, "CP1201"},
     {1201, "UTF16BE"},
@@ -952,7 +953,8 @@ make_csconv(const char *_name, csconv_t *cv)
         cv->mbtowc = utf16_mbtowc;
         cv->wctomb = utf16_wctomb;
         if (_stricmp(name, "UTF-16") == 0 || _stricmp(name, "UTF16") == 0 ||
-          _stricmp(name, "UCS-2") == 0 || _stricmp(name, "UCS2") == 0)
+          _stricmp(name, "UCS-2") == 0 || _stricmp(name, "UCS2") == 0 ||
+	  _stricmp(name,"UCS-2-INTERNAL") == 0)
             cv->flags |= FLAG_USE_BOM;
     }
     else if (cv->codepage == 12000 || cv->codepage == 12001)
