@@ -3,6 +3,7 @@ EXPORTS
   iconv_open
   iconv_close
   iconvctl
+  locale_charset
   libiconv=iconv
   libiconv_open=iconv_open
   libiconv_close=iconv_close
@@ -20,4 +21,3 @@ EXPORTS
 ;  libiconv_set_relocation_prefix @9
 ;  libiconvctl @10
 ;  libiconvlist @11
-;  locale_charset @12

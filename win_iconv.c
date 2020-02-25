@@ -155,6 +155,36 @@ static int iso2022jp_flush(csconv_t *cv, uchar *buf, int bufsize);
 static struct {
     int codepage;
     const char *name;
+} simple_codepage_alias[] = {
+    {936, "GBK"},
+    {1361, "JOHAB"},
+    {20127, "ASCII"},
+    {20866, "KOI8-R"},
+    {20936, "GB2312"},
+    {21866, "KOI8-RU"},
+    {28591, "ISO-8859-1"},
+    {28592, "ISO-8859-2"},
+    {28593, "ISO-8859-3"},
+    {28594, "ISO-8859-4"},
+    {28595, "ISO-8859-5"},
+    {28596, "ISO-8859-6"},
+    {28597, "ISO-8859-7"},
+    {28598, "ISO-8859-8"},
+    {28599, "ISO-8859-9"},
+    {28605, "ISO-8859-15"},
+    {38598, "ISO-8859-8"},
+    {51932, "EUC-JP"},
+    {51936, "GB2312"},
+    {51949, "EUC-KR"},
+    {51950, "EUC-TW"},
+    {54936, "GB18030"},
+    {65001, "UTF-8"},
+    {0, NULL}
+};
+
+static struct {
+    int codepage;
+    const char *name;
 } codepage_alias[] = {
     {65001, "CP65001"},
     {65001, "UTF8"},
@@ -1040,6 +1070,19 @@ name_to_codepage(const char *name)
         if (_stricmp(name, codepage_alias[i].name) == 0)
             return codepage_alias[i].codepage;
     return -1;
+}
+
+const char * locale_charset()
+{
+    UINT cp = GetACP();
+    for (int i = 0; simple_codepage_alias[i].name != NULL; ++i)
+    {
+        if (cp == simple_codepage_alias[i].codepage)
+        {
+            return simple_codepage_alias[i].name;
+        }
+    }
+    return "ASCII";
 }
 
 /*
