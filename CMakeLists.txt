@@ -1,82 +1,52 @@
+cmake_minimum_required(VERSION 3.0)
 project(win_iconv)
 
-cmake_minimum_required(VERSION 2.6)
+set(CMAKE_DEBUG_POSTFIX "d")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(CPACK_GENERATOR "TBZ2")
-include(CPack)
+find_package(Doxygen)
 
-option(BUILD_TEST "build test executable" OFF)
-if(WINCE)
-    option(BUILD_STATIC "build the static library" ON)
-    option(BUILD_SHARED "build the shared library" OFF)
-    option(BUILD_EXECUTABLE "build the win_iconv executable" OFF)
-else(WINCE)
-    option(BUILD_STATIC "build the static library" OFF)
-    option(BUILD_SHARED "build the shared library" ON)
-    option(BUILD_EXECUTABLE "build the win_iconv executable" ON)
-endif(WINCE)
-
-if(BUILD_TEST)
-    enable_testing()
-endif(BUILD_TEST)
+option(WIN_ICONV_BUILD_TEST "build test executable" OFF)
+option(WIN_ICONV_BUILD_STATIC "build the static library" ON)
+option(WIN_ICONV_BUILD_SHARED "build the shared library" ON)
+option(WIN_ICONV_BUILD_EXECUTABLE "build the win_iconv executable" ON)
 
 if(MSVC)
     add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
-if(NOT WINCE)
-    add_definitions(-DUSE_LIBICONV_DLL)
-    if(DEFAULT_LIBICONV_DLL)
-        add_definitions(-DDEFAULT_LIBICONV_DLL=${DEFAULT_LIBICONV_DLL})
-    endif(DEFAULT_LIBICONV_DLL)
-else(NOT WINCE)
-    find_package(Wcecompat REQUIRED)
-    include_directories(${WCECOMPAT_INCLUDE_DIR})
-endif(NOT WINCE)
+add_definitions(-DUSE_LIBICONV_DLL)
+if(DEFAULT_LIBICONV_DLL)
+	add_definitions(-DDEFAULT_LIBICONV_DLL=${DEFAULT_LIBICONV_DLL})
+endif(DEFAULT_LIBICONV_DLL)
 
-if(BUILD_SHARED)
-    add_library(iconv SHARED win_iconv.c iconv.def)
-    set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL"
-                                           PREFIX "")
-    if(WINCE)
-        target_link_libraries(iconv ${WCECOMPAT_LIBRARIES})
-    endif(WINCE)
+if(WIN_ICONV_BUILD_SHARED)
+    add_library(iconv SHARED win_iconv.c iconv.def iconv.h localcharset.h)
+    set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL" PREFIX "")
     install(TARGETS iconv RUNTIME DESTINATION bin
                           LIBRARY DESTINATION lib
                           ARCHIVE DESTINATION lib)
-endif(BUILD_SHARED)
+endif(WIN_ICONV_BUILD_SHARED)
 
-if(BUILD_EXECUTABLE)
-    add_executable(win_iconv win_iconv.c)
+if(WIN_ICONV_BUILD_EXECUTABLE)
+    add_executable(win_iconv win_iconv.c iconv.h localcharset.h)
     set_target_properties(win_iconv PROPERTIES COMPILE_FLAGS "-DMAKE_EXE")
-    if(WINCE)
-        target_link_libraries(win_iconv ${WCECOMPAT_LIBRARIES})
-    endif(WINCE)
     install(TARGETS win_iconv RUNTIME DESTINATION bin
                               LIBRARY DESTINATION lib
                               ARCHIVE DESTINATION lib)
-endif(BUILD_EXECUTABLE)
+endif(WIN_ICONV_BUILD_EXECUTABLE)
 
-if(BUILD_STATIC)
-    add_library(iconv-static STATIC win_iconv.c)
-    set_target_properties(iconv-static PROPERTIES OUTPUT_NAME "iconv")
-    if(WINCE)
-        target_link_libraries(iconv-static ${WCECOMPAT_LIBRARIES})
-    endif(WINCE)
-    install(TARGETS iconv-static RUNTIME DESTINATION bin
-                                 LIBRARY DESTINATION lib
-                                 ARCHIVE DESTINATION lib)
-endif(BUILD_STATIC)
+if(WIN_ICONV_BUILD_STATIC)
+    add_library(libiconv STATIC win_iconv.c iconv.h localcharset.h)
+    install(TARGETS libiconv RUNTIME DESTINATION bin
+                             LIBRARY DESTINATION lib
+                             ARCHIVE DESTINATION lib)
+endif(WIN_ICONV_BUILD_STATIC)
 
+install(FILES iconv.h localcharset.h DESTINATION include)
 
-install(FILES iconv.h DESTINATION include)
-
-if(BUILD_TEST)
-    # tests:
+if(WIN_ICONV_BUILD_TEST)
+    enable_testing()
     add_executable(win_iconv_test win_iconv_test.c)
     add_test(win_iconv_test win_iconv_test)
-    if(WINCE)
-        target_link_libraries(win_iconv_test ${WCECOMPAT_LIBRARIES})
-    endif(WINCE)
-endif(BUILD_TEST)
+endif(WIN_ICONV_BUILD_TEST)
