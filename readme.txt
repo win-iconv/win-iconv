@@ -1,4 +1,4 @@
-win_iconv is a iconv implementation using Win32 API to convert.
+win_iconv is an iconv implementation using Win32 API to convert.
 
 win_iconv is placed in the public domain.
 
