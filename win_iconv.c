@@ -155,10 +155,56 @@ static int iso2022jp_flush(csconv_t *cv, uchar *buf, int bufsize);
 static struct {
     int codepage;
     const char *name;
+} additional_codepage_alias[] = {
+    {874, "CP874"},
+    {932, "CP932"},
+    {936, "GBK"},
+    {949, "CP949"},
+    {950, "CP950"},
+    {1250, "CP1250"},
+    {1251, "CP1251"},
+    {1252, "CP1252"},
+    {1253, "CP1253"},
+    {1254, "CP1254"},
+    {1255, "CP1255"},
+    {1256, "CP1256"},
+    {1257, "CP1257"},
+    {1361, "JOHAB"},
+    {20127, "ASCII"},
+    {20866, "KOI8-R"},
+    {20936, "GB2312"},
+    {21866, "KOI8-RU"},
+    {28591, "ISO-8859-1"},
+    {28592, "ISO-8859-2"},
+    {28593, "ISO-8859-3"},
+    {28594, "ISO-8859-4"},
+    {28595, "ISO-8859-5"},
+    {28596, "ISO-8859-6"},
+    {28597, "ISO-8859-7"},
+    {28598, "ISO-8859-8"},
+    {28599, "ISO-8859-9"},
+    {28605, "ISO-8859-15"},
+    {38598, "ISO-8859-8"},
+    {51932, "EUC-JP"},
+    {51936, "GB2312"},
+    {51949, "EUC-KR"},
+    {51950, "EUC-TW"},
+    {54936, "GB18030"},
+    {65000, "UTF-7"},
+    {65001, "UTF-8"},
+    {0, NULL}
+};
+
+static struct {
+    int codepage;
+    const char *name;
 } codepage_alias[] = {
     {65001, "CP65001"},
     {65001, "UTF8"},
     {65001, "UTF-8"},
+    {65000, "CP65000"},
+    {65000, "UTF7"},
+    {65000, "UTF-7"},
 
     {1200, "CP1200"},
     {1200, "UTF16LE"},
@@ -558,10 +604,18 @@ static struct {
     {28599, "iso8859-9"}, /* ISO 8859-9 Turkish */
     {28599, "iso_8859-9"},
     {28599, "iso_8859_9"},
+    {28600, "iso-8859-10"}, /* ISO 8859-10 Latin 6 */
+    {28600, "iso8859-10"}, /* ISO 8859-10 Latin 6 */
+    {28600, "iso_8859-10"},
+    {28600, "iso_8859_10"},
     {28603, "iso-8859-13"}, /* ISO 8859-13 Estonian */
     {28603, "iso8859-13"}, /* ISO 8859-13 Estonian */
     {28603, "iso_8859-13"},
     {28603, "iso_8859_13"},
+    {28604, "iso-8859-14"}, /* ISO 8859-14 Celtic */
+    {28604, "iso8859-14"}, /* ISO 8859-14 Celtic */
+    {28604, "iso_8859-14"},
+    {28604, "iso_8859_14"},
     {28605, "iso-8859-15"}, /* ISO 8859-15 Latin 9 */
     {28605, "iso8859-15"}, /* ISO 8859-15 Latin 9 */
     {28605, "iso_8859-15"},
@@ -601,7 +655,6 @@ static struct {
     {57009, "x-iscii-ma"}, /* ISCII Malayalam */
     {57010, "x-iscii-gu"}, /* ISCII Gujarati */
     {57011, "x-iscii-pa"}, /* ISCII Punjabi */
-
     {0, NULL}
 };
 
@@ -814,7 +867,7 @@ win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, s
         if (outbuf != NULL && *outbuf != NULL && cd->to.flush != NULL)
         {
             tomode = cd->to.mode;
-            outsize = cd->to.flush(&cd->to, (uchar *)*outbuf, *outbytesleft);
+            outsize = cd->to.flush(&cd->to, (uchar *)*outbuf, (int)*outbytesleft);
             if (outsize == -1)
             {
                 if ((cd->to.flags & FLAG_IGNORE) && errno != E2BIG)
@@ -841,7 +894,7 @@ win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, s
         tomode = cd->to.mode;
         wsize = MB_CHAR_MAX;
 
-        insize = cd->from.mbtowc(&cd->from, (const uchar *)*inbuf, *inbytesleft, wbuf, &wsize);
+        insize = cd->from.mbtowc(&cd->from, (const uchar *)*inbuf, (int)*inbytesleft, wbuf, &wsize);
         if (insize == -1)
         {
             if (cd->to.flags & FLAG_IGNORE)
@@ -892,7 +945,7 @@ win_iconv(iconv_t _cd, const char **inbuf, size_t *inbytesleft, char **outbuf, s
             }
         }
 
-        outsize = cd->to.wctomb(&cd->to, wbuf, wsize, (uchar *)*outbuf, *outbytesleft);
+        outsize = cd->to.wctomb(&cd->to, wbuf, wsize, (uchar *)*outbuf, (int)*outbytesleft);
         if (outsize == -1)
         {
             if ((cd->to.flags & FLAG_IGNORE) && errno != E2BIG)
@@ -954,7 +1007,7 @@ make_csconv(const char *_name, csconv_t *cv)
         cv->wctomb = utf16_wctomb;
         if (_stricmp(name, "UTF-16") == 0 || _stricmp(name, "UTF16") == 0 ||
           _stricmp(name, "UCS-2") == 0 || _stricmp(name, "UCS2") == 0 ||
-	  _stricmp(name,"UCS-2-INTERNAL") == 0)
+          _stricmp(name,"UCS-2-INTERNAL") == 0)
             cv->flags |= FLAG_USE_BOM;
     }
     else if (cv->codepage == 12000 || cv->codepage == 12001)
@@ -984,7 +1037,7 @@ make_csconv(const char *_name, csconv_t *cv)
         cv->mblen = eucjp_mblen;
     }
     else if (IsValidCodePage(cv->codepage)
-	     && GetCPInfo(cv->codepage, &cpinfo) != 0)
+             && GetCPInfo(cv->codepage, &cpinfo) != 0)
     {
         cv->mbtowc = kernel_mbtowc;
         cv->wctomb = kernel_wctomb;
@@ -993,7 +1046,7 @@ make_csconv(const char *_name, csconv_t *cv)
         else if (cpinfo.MaxCharSize == 2)
             cv->mblen = dbcs_mblen;
         else
-	    cv->mblen = mbcs_mblen;
+            cv->mblen = mbcs_mblen;
     }
     else
     {
@@ -1025,9 +1078,9 @@ name_to_codepage(const char *name)
     int i;
 
     if (*name == '\0' ||
-	strcmp(name, "char") == 0)
+        strcmp(name, "char") == 0)
         return GetACP();
-    else if (strcmp(name, "wchar_t") == 0)
+    else if (_stricmp(name, "wchar_t") == 0)
         return 1200;
     else if (_strnicmp(name, "cp", 2) == 0)
         return atoi(name + 2); /* CP123 */
@@ -1085,11 +1138,11 @@ static int
 mbtowc_flags(int codepage)
 {
     return (codepage == 50220 || codepage == 50221 ||
-	    codepage == 50222 || codepage == 50225 ||
-	    codepage == 50227 || codepage == 50229 ||
-	    codepage == 52936 || codepage == 54936 ||
-	    (codepage >= 57002 && codepage <= 57011) ||
-	    codepage == 65000 || codepage == 42) ? 0 : MB_ERR_INVALID_CHARS;
+            codepage == 50222 || codepage == 50225 ||
+            codepage == 50227 || codepage == 50229 ||
+            codepage == 52936 || codepage == 54936 ||
+            (codepage >= 57002 && codepage <= 57011) ||
+            codepage == 65000 || codepage == 42) ? 0 : MB_ERR_INVALID_CHARS;
 }
 
 /*
@@ -1115,7 +1168,7 @@ must_use_null_useddefaultchar(int codepage)
 static char *
 strrstr(const char *str, const char *token)
 {
-    int len = strlen(token);
+    size_t len = strlen(token);
     const char *p = str + strlen(str);
 
     while (str <= --p)
@@ -1301,20 +1354,24 @@ mbcs_mblen(csconv_t *cv, const uchar *buf, int bufsize)
     int len = 0;
 
     if (cv->codepage == 54936) {
-	if (buf[0] <= 0x7F) len = 1;
-	else if (buf[0] >= 0x81 && buf[0] <= 0xFE &&
-		 bufsize >= 2 &&
-		 ((buf[1] >= 0x40 && buf[1] <= 0x7E) ||
-		  (buf[1] >= 0x80 && buf[1] <= 0xFE))) len = 2;
-	else if (buf[0] >= 0x81 && buf[0] <= 0xFE &&
-		 bufsize >= 4 &&
-		 buf[1] >= 0x30 && buf[1] <= 0x39) len = 4;
-	else
-	    return seterror(EINVAL);
-	return len;
+        if (buf[0] <= 0x7F) len = 1;
+        else if (buf[0] >= 0x81 && buf[0] <= 0xFE &&
+             bufsize >= 2 &&
+             ((buf[1] >= 0x40 && buf[1] <= 0x7E) ||
+              (buf[1] >= 0x80 && buf[1] <= 0xFE))) len = 2;
+        else if (buf[0] >= 0x81 && buf[0] <= 0xFE &&
+             bufsize >= 4 &&
+             buf[1] >= 0x30 && buf[1] <= 0x39) len = 4;
+        else if (buf[0] < 0x81 || buf[0] > 0xFE)
+            return seterror(EILSEQ);
+        else if (bufsize < 2 || (buf[1] >= 0x30 && buf[1] <= 0x39 && bufsize < 4))
+            return seterror(EINVAL);
+        else
+            return seterror(EILSEQ);
+        return len;
     }
     else
-	return seterror(EINVAL);
+        return seterror(EINVAL);
 }
 
 static int
@@ -1937,6 +1994,20 @@ iso2022jp_flush(csconv_t *cv, uchar *buf, int bufsize)
     return 0;
 }
 
+/**
+@brief Determine the current locale's character encoding, and canonicalize it
+*/
+const char* locale_charset()
+{
+    UINT acp = GetACP();
+    for (int i = 0; additional_codepage_alias[i].name != NULL; ++i)
+    {
+        if (acp == additional_codepage_alias[i].codepage)
+            return additional_codepage_alias[i].name;
+    }
+    return "ASCII";
+}
+
 #if defined(MAKE_DLL) && defined(USE_LIBICONV_DLL)
 BOOL WINAPI
 DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpReserved)
@@ -2072,6 +2143,9 @@ main(int argc, char **argv)
     }
 
     iconv_close(cd);
+
+    if (in != stdin) fclose(in);
+    if (out != stdout) fclose(out);
 
     return 0;
 }
