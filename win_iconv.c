@@ -1994,6 +1994,7 @@ iso2022jp_flush(csconv_t *cv, uchar *buf, int bufsize)
     return 0;
 }
 
+#ifndef DISABLE_LOCALE_CHARSET
 /**
 @brief Determine the current locale's character encoding, and canonicalize it
 */
@@ -2007,6 +2008,7 @@ const char* locale_charset()
     }
     return "ASCII";
 }
+#endif
 
 #if defined(MAKE_DLL) && defined(USE_LIBICONV_DLL)
 BOOL WINAPI
