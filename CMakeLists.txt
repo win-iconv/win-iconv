@@ -31,11 +31,11 @@ else(DISABLE_LOCALE_CHARSET)
 endif(DISABLE_LOCALE_CHARSET)
 
 if(WIN_ICONV_BUILD_SHARED)
-    add_library(iconv SHARED win_iconv.c iconv-g.def iconv.h localcharset.h)
-    set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL" PREFIX "")
-    install(TARGETS iconv RUNTIME DESTINATION bin
-                          LIBRARY DESTINATION lib
-                          ARCHIVE DESTINATION lib)
+    add_library(libiconv SHARED win_iconv.c iconv-g.def iconv.h localcharset.h)
+    set_target_properties(libiconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL" PREFIX "")
+    install(TARGETS libiconv RUNTIME DESTINATION bin
+                             LIBRARY DESTINATION lib
+                             ARCHIVE DESTINATION lib)
 endif(WIN_ICONV_BUILD_SHARED)
 
 if(WIN_ICONV_BUILD_EXECUTABLE)
@@ -47,10 +47,10 @@ if(WIN_ICONV_BUILD_EXECUTABLE)
 endif(WIN_ICONV_BUILD_EXECUTABLE)
 
 if(WIN_ICONV_BUILD_STATIC)
-    add_library(libiconv STATIC win_iconv.c iconv.h localcharset.h)
-    install(TARGETS libiconv RUNTIME DESTINATION bin
-                             LIBRARY DESTINATION lib
-                             ARCHIVE DESTINATION lib)
+    add_library(iconv STATIC win_iconv.c iconv.h localcharset.h)
+    install(TARGETS iconv RUNTIME DESTINATION bin
+                          LIBRARY DESTINATION lib
+                          ARCHIVE DESTINATION lib)
 endif(WIN_ICONV_BUILD_STATIC)
 
 install(FILES iconv.h localcharset.h DESTINATION include)
