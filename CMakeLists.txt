@@ -31,11 +31,11 @@ else(DISABLE_LOCALE_CHARSET)
 endif(DISABLE_LOCALE_CHARSET)
 
 if(WIN_ICONV_BUILD_SHARED)
-    add_library(iconv SHARED win_iconv.c iconv-g.def iconv.h localcharset.h)
-    set_target_properties(iconv PROPERTIES COMPILE_FLAGS "-DMAKE_DLL" PREFIX "")
-    install(TARGETS iconv RUNTIME DESTINATION bin
-                          LIBRARY DESTINATION lib
-                          ARCHIVE DESTINATION lib)
+    add_library(iconv_shared SHARED win_iconv.c iconv-g.def iconv.h localcharset.h)
+    set_target_properties(iconv_shared PROPERTIES COMPILE_FLAGS "-DMAKE_DLL" PREFIX "" OUTPUT_NAME iconv)
+    install(TARGETS iconv_shared RUNTIME DESTINATION bin
+                                 LIBRARY DESTINATION lib
+                                 ARCHIVE DESTINATION lib)
 endif(WIN_ICONV_BUILD_SHARED)
 
 if(WIN_ICONV_BUILD_EXECUTABLE)
@@ -47,10 +47,16 @@ if(WIN_ICONV_BUILD_EXECUTABLE)
 endif(WIN_ICONV_BUILD_EXECUTABLE)
 
 if(WIN_ICONV_BUILD_STATIC)
-    add_library(libiconv STATIC win_iconv.c iconv.h localcharset.h)
-    install(TARGETS libiconv RUNTIME DESTINATION bin
-                             LIBRARY DESTINATION lib
-                             ARCHIVE DESTINATION lib)
+    add_library(iconv_static STATIC win_iconv.c iconv.h localcharset.h)
+    if(MSVC)
+        # FIXME: keep previous behavior for now
+        set_target_properties(iconv_static PROPERTIES OUTPUT_NAME libiconv)
+    else(MSVC)
+        set_target_properties(iconv_static PROPERTIES OUTPUT_NAME iconv)
+    endif(MSVC)
+    install(TARGETS iconv_static RUNTIME DESTINATION bin
+                                 LIBRARY DESTINATION lib
+                                 ARCHIVE DESTINATION lib)
 endif(WIN_ICONV_BUILD_STATIC)
 
 install(FILES iconv.h localcharset.h DESTINATION include)
