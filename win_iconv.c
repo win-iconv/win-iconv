@@ -1642,9 +1642,9 @@ utf32_mbtowc(csconv_t *cv, const uchar *buf, int bufsize, ushort *wbuf, int *wbu
     if (bufsize < 4)
         return seterror(EINVAL);
     if (codepage == 12000) /* little endian */
-        wc = (buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
+        wc = ((uint)buf[3] << 24) | (buf[2] << 16) | (buf[1] << 8) | buf[0];
     else if (codepage == 12001) /* big endian */
-        wc = (buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
+        wc = ((uint)buf[0] << 24) | (buf[1] << 16) | (buf[2] << 8) | buf[3];
 
     if ((cv->flags & FLAG_USE_BOM) && !(cv->mode & UNICODE_MODE_BOM_DONE))
     {
