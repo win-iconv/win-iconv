@@ -40,7 +40,7 @@ endif(WIN_ICONV_BUILD_SHARED)
 
 if(WIN_ICONV_BUILD_EXECUTABLE)
     add_executable(win_iconv win_iconv.c iconv.h localcharset.h)
-    set_target_properties(win_iconv PROPERTIES COMPILE_FLAGS "-DMAKE_EXE" OUTPUT_NAME "win_iconv.exe")
+    set_target_properties(win_iconv PROPERTIES COMPILE_FLAGS "-DMAKE_EXE")
     install(TARGETS win_iconv RUNTIME DESTINATION bin
                               LIBRARY DESTINATION lib
                               ARCHIVE DESTINATION lib)
